@@ -10,6 +10,8 @@ RGEO_BEGIN_C
 
 // Any error relative to RGeo.
 extern VALUE rgeo_error;
+// RGeo::Error::InvalidGeometry
+extern VALUE rgeo_invalid_geometry_error;
 // RGeo error specific to the GEOS implementation.
 extern VALUE geos_error;
 

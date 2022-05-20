@@ -13,6 +13,7 @@
 
 #include "globals.h"
 
+#include "errors.h"
 #include "factory.h"
 #include "geometry.h"
 
@@ -1056,6 +1057,23 @@ static VALUE method_geometry_invalid_reason(VALUE self)
   return result;
 }
 
+static VALUE method_geometry_make_valid(VALUE self)
+{
+  RGeo_GeometryData* self_data;
+  const GEOSGeometry* self_geom;
+  GEOSGeometry* valid_geom;
+  self_data = RGEO_GEOMETRY_DATA_PTR(self);
+  self_geom = self_data->geom;
+  if (!self_geom) return Qnil;
+
+  // According to GEOS implementation, MakeValid always returns.
+  valid_geom = GEOSMakeValid_r(self_data->geos_context, self_geom);
+  if (!valid_geom) {
+    rb_raise(rgeo_invalid_geometry_error, "%"PRIsVALUE, method_geometry_invalid_reason(self));
+  }
+  return rgeo_wrap_geos_geometry(self_data->factory, valid_geom, Qnil);
+}
+
 static VALUE method_geometry_point_on_surface(VALUE self)
 {
   VALUE result;
@@ -1126,6 +1144,7 @@ void rgeo_init_geos_geometry()
   rb_define_method(geos_geometry_methods, "valid?", method_geometry_is_valid, 0);
   rb_define_method(geos_geometry_methods, "invalid_reason", method_geometry_invalid_reason, 0);
   rb_define_method(geos_geometry_methods, "point_on_surface", method_geometry_point_on_surface, 0);
+  rb_define_method(geos_geometry_methods, "make_valid", method_geometry_make_valid, 0);
 }
 
 
